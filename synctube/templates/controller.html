@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+        <meta charset=utf-8 />
+        <title>SyncTube</title>
+        <link rel="stylesheet" type="text/css" media="screen" href="/static/styles/master.css" />
+        <link rel="stylesheet" type="text/css" media="screen" href="/static/styles/font-awesome.min.css" />
+</head>
+<body>
+    <div class='column' style='background-color: #1D3674;'>
+      <h1>Controller: {{player_id}}</h1>
+      <form>
+        <input placeholder='Enter youtube video URL here...' id='inputUrl' type='url'></input>
+        <input class='validator' id='playNow' type='submit' value='Play now'></input>
+        <input class='validator' id='playLater' type='submit' value='Play later'></input>
+      </form>
+    </div>
+
+    <div class='column'>
+      <i id='btn-prev' class='control-button fa fa-fast-backward fa-5x '> </i>
+      <i id='btn-pause' class='control-button fa fa-pause fa-5x '> </i>
+      <i id='btn-play' class='control-button fa fa-play fa-5x '> </i>
+      <i id='btn-next' class='control-button fa fa-fast-forward fa-5x '> </i>
+    </div>
+
+    <script>
+        var playerId = '{{player_id}}';
+    </script>
+    <script type="text/javascript" src="/static/scripts/controller.js"></script>
+</body>
+</html>

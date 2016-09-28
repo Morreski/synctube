@@ -1,0 +1,54 @@
+body {
+  background-color: #FFFFFF;
+  margin: 0;
+  padding: 0;
+}
+
+h1 {
+  color: white;
+}
+
+p.menu-title {
+  font-size: 0.4em;
+  margin-top: 0px;
+}
+
+.validator {
+  margin-top: 1vh;
+}
+
+.choose-items {
+  cursor: pointer;
+  display: inline-block;
+  width: 49.8%;
+  font-size: 15em;
+  text-align: center;
+}
+
+.column {
+  display: inline-block;
+  width: 49.8%;
+  height: 100vh;
+  text-align: center;
+}
+
+.control-button {
+  cursor: pointer;
+  color: #1D3674;
+  margin-left: 10%;
+}
+
+#inputUrl {
+  width: 97%;
+}
+
+#choose-player {
+  background-color: #1D3674;
+  color: #FFFFFF;
+  height: 100vh;
+}
+
+#choose-controller {
+  background-color: #FFFFFF;
+  color: #1D3674;
+}
