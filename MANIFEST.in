@@ -1,0 +1,2 @@
+recursive-include synctube/templates *.html
+recursive-include synctube/static *

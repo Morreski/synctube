@@ -1,3 +1,4 @@
+import os
 import logging
 import argparse
 
@@ -8,6 +9,8 @@ from synctube.eventsources import HostEventStream
 from synctube.sse_utils import AsyncioSSEHandler
 from synctube import handlers
 from synctube import views
+
+BASE = os.path.dirname(__file__)
 
 parser = argparse.ArgumentParser()
 
@@ -52,8 +55,8 @@ def make_app(debug=True):
     return tornado.web.Application(routes,
                                    debug=debug,
                                    static_url_prefix='/static/',
-                                   template_path='./templates',
-                                   static_path='./static')
+                                   template_path=os.path.join(BASE, 'templates'),
+                                   static_path=os.path.join(BASE, 'static'))
 
 
 def main():
