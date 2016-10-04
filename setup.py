@@ -9,6 +9,7 @@ setup(
     author_email='epelletier@protonmail.com',
     license='GNU GPLv3',
     packages=['synctube'],
+    install_requires=['tornado==4.3'],
     include_package_data = True,
     entry_points={
         'console_scripts': ['synctube=synctube.app:main']
