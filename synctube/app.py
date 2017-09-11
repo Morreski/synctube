@@ -5,7 +5,7 @@ import argparse
 import tornado
 from tornado.httpserver import HTTPServer
 
-from synctube.eventsources import HostEventStream
+from synctube.eventsources import PlayerEventStream
 from synctube.sse_utils import AsyncioSSEHandler
 from synctube import handlers
 from synctube import views
@@ -30,27 +30,27 @@ parser.add_argument('--debug',
 
 def make_app(debug=True):
     routes = [
-        (r'^/player/(?P<player_id>[a-zA-Z0-9]*)$', views.PlayerPage),
-        (r'^/player/(?P<player_id>[a-zA-Z0-9]*)/subscribe$', AsyncioSSEHandler, {'datasource': HostEventStream}),
-        (r'^/player/(?P<player_id>[a-zA-Z0-9]*)/unsubscribe$', handlers.UnsubscribePlayer),
+        #(r'^/player/(?P<player_id>[a-zA-Z0-9]*)$', views.PlayerPage),
+        (r'^/player/(?P<player_id>[a-zA-Z0-9]*)/subscribe$', AsyncioSSEHandler, {'datasource': PlayerEventStream}),
+        #(r'^/player/(?P<player_id>[a-zA-Z0-9]*)/unsubscribe$', handlers.UnsubscribePlayer),
 
-        (r'^/player/(?P<player_id>[a-zA-Z0-9]*)/play/(?P<video_id>.*)$', handlers.AddVideo),
-        (r'^/player/(?P<player_id>[a-zA-Z0-9]*)/play$', handlers.CommandPlay),
-        (r'^/player/(?P<player_id>[a-zA-Z0-9]*)/pause$', handlers.CommandPause),
-        (r'^/player/(?P<player_id>[a-zA-Z0-9]*)/next', handlers.CommandNextSong),
-        (r'^/player/(?P<player_id>[a-zA-Z0-9]*)/prev', handlers.CommandPrevSong),
+        #(r'^/player/(?P<player_id>[a-zA-Z0-9]*)/play/(?P<video_id>.*)$', handlers.AddVideo),
+        #(r'^/player/(?P<player_id>[a-zA-Z0-9]*)/play$', handlers.CommandPlay),
+        #(r'^/player/(?P<player_id>[a-zA-Z0-9]*)/pause$', handlers.CommandPause),
+        #(r'^/player/(?P<player_id>[a-zA-Z0-9]*)/next', handlers.CommandNextSong),
+        #(r'^/player/(?P<player_id>[a-zA-Z0-9]*)/prev', handlers.CommandPrevSong),
 
-        (r'^/player/(?P<player_id>[a-zA-Z0-9]*)/playlist/add/(?P<video_id>.*)$', handlers.AddVideoToPlaylist),
-        (r'^/player/(?P<player_id>[a-zA-Z0-9]*)/playlist/next$', handlers.GetNextSongId),
-        (r'^/player/(?P<player_id>[a-zA-Z0-9]*)/playlist/prev$', handlers.GetPreviousSongId),
+        #(r'^/player/(?P<player_id>[a-zA-Z0-9]*)/playlist/add/(?P<video_id>.*)$', handlers.AddVideoToPlaylist),
+        #(r'^/player/(?P<player_id>[a-zA-Z0-9]*)/playlist/next$', handlers.GetNextSongId),
+        #(r'^/player/(?P<player_id>[a-zA-Z0-9]*)/playlist/prev$', handlers.GetPreviousSongId),
 
         (r'^/controller/(?P<player_id>[a-zA-Z0-9]*)$', views.ControllerPage),
 
-        (r'^/admin/drop-all$', handlers.DropAll),
-        (r'^/admin/unsubscribe-all$', handlers.UnsubscribeAll),
+        #(r'^/admin/drop-all$', handlers.DropAll),
+        #(r'^/admin/unsubscribe-all$', handlers.UnsubscribeAll),
 
-        (r'/home$', views.HomePage),
-        (r'^/$', tornado.web.RedirectHandler, {'url': '/home'}),
+        #(r'/home$', views.HomePage),
+        #(r'^/$', tornado.web.RedirectHandler, {'url': '/home'}),
     ]
     return tornado.web.Application(routes,
                                    debug=debug,

@@ -1,6 +1,9 @@
+import json
+
 from tornado.web import RequestHandler
 
 from synctube import shared
+from synctube.player import PlayerEvent
 
 
 class HomePage(RequestHandler):
@@ -17,6 +20,15 @@ class PlayerPage(RequestHandler):
 
 
 class ControllerPage(RequestHandler):
+
+    async def post(self, player_id):
+        try:
+            event_dict = json.loads(self.request.body.decode())
+            event = PlayerEvent(**event_dict)
+        except json.JSONDecodeError as e:
+            self.send_error(400, reason='Bad JSON: %s' % e)
+
+        await shared.PLAYERS[player_id].add_event(event)
 
     async def get(self, player_id):
         if player_id not in shared.EVENT_QUEUES:
