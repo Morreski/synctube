@@ -15,8 +15,8 @@ BASE = os.path.dirname(__file__)
 parser = argparse.ArgumentParser()
 
 parser.add_argument('--port', type=int,
-                    help='The server listening port.',
-                    default=4242)
+                    help='The server listening port. (default to 8080)',
+                    default=8080)
 parser.add_argument('--logfile', type=str,
                     help='Path for the logfile. If not specified, server will print to stdout.',
                     default='')
