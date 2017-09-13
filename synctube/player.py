@@ -4,7 +4,7 @@ import asyncio
 PlayerEvent = namedtuple('PlayerEvent', ['type', 'data'])
 
 
-class PlayListError(Exception):
+class PlaylistError(Exception):
     pass
 
 
@@ -40,7 +40,7 @@ class Playlist:
 
     def append(self, video_id):
         if video_id in self._videos:
-            raise PlayListError('Video is already in playlist.')
+            raise PlaylistError('Video is already in playlist.')
 
         if self.first is None:
             self.first = video_id
@@ -54,9 +54,9 @@ class Playlist:
 
     def insert_after(self, after_id, video_id):
         if video_id in self._videos:
-            raise PlayListError('Video is already in playlist.')
+            raise PlaylistError('Video is already in playlist.')
         if after_id not in self._videos:
-            raise PlayListError('Cannot insert video: %s not in playlist.' % after_id)
+            raise PlaylistError('Cannot insert video: %s not in playlist.' % after_id)
         left_video = self[after_id]
         right_video_id = left_video['next']
         self[right_video_id]['prev'] = video_id
