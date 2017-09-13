@@ -15,13 +15,18 @@ class HomePage(RequestHandler):
 class PlayerPage(RequestHandler):
 
     async def get(self, player_id):
-        self.render('player.html',
-                    player_id=player_id)
+        self.render(
+            'player.html',
+            player_id=player_id
+        )
 
 
 class ControllerPage(RequestHandler):
 
     async def post(self, player_id):
+        if player_id not in shared.PLAYERS:
+            self.send_error(404)
+            return
         try:
             event_dict = json.loads(self.request.body.decode())
             event = PlayerEvent(**event_dict)
@@ -31,8 +36,10 @@ class ControllerPage(RequestHandler):
         await shared.PLAYERS[player_id].add_event(event)
 
     async def get(self, player_id):
-        if player_id not in shared.EVENT_QUEUES:
+        if player_id not in shared.PLAYERS:
             self.send_error(404)
             return
-        self.render('controller.html',
-                    player_id=player_id)
+        self.render(
+            'controller.html',
+            player_id=player_id
+        )
