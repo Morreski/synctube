@@ -4,6 +4,10 @@ import asyncio
 PlayerEvent = namedtuple('PlayerEvent', ['type', 'data'])
 
 
+class PlayListError(Exception):
+    pass
+
+
 class Player:
 
     def __init__(self, id_):
@@ -21,63 +25,41 @@ class Player:
 class Playlist:
 
     def __init__(self):
-        keys = ['next', 'prev']
-        self._videos = defaultdict(lambda: dict.fromkeys(keys))
-        self.currently_playing = None
+        self._videos = defaultdict(lambda: dict.fromkeys(('next', 'prev')))
         self.last = None
         self.first = None
 
+    def __getitem__(self, video_id):
+        return self._videos[video_id]
+
+    def __iter__(self):
+        video_id = self.first
+        while video_id is not None:
+            yield video_id
+            video_id = self[video_id]['next']
+
     def append(self, video_id):
         if video_id in self._videos:
-            return  # Video already here, do nothing to avoid duplicates
+            raise PlayListError('Video is already in playlist.')
 
         if self.first is None:
             self.first = video_id
-            self._videos[video_id]['next'] = None
-            self._videos[video_id]['prev'] = None
+            self[video_id]['next'] = None
+            self[video_id]['prev'] = None
         else:
-            self._videos[self.last]['next'] = video_id
-            self._videos[video_id]['prev'] = self.last
+            self[self.last]['next'] = video_id
+            self[video_id]['prev'] = self.last
 
         self.last = video_id
 
-    def insert_now(self, video_id):
+    def insert_after(self, after_id, video_id):
         if video_id in self._videos:
-            return  # Video already here, do nothing to avoid duplicates
-
-        if self.first is None:
-            self.append(video_id)
-            return
-
-        if self.currently_playing is not None:
-            next_video = self._videos[self.currently_playing]['next']
-        else:
-            next_video = self.first
-
-        if next_video is None:
-            self.last = video_id
-        else:
-            self._videos[next_video]['prev'] = video_id
-
-        self._videos[self.currently_playing]['next'] = video_id
-        self._videos[video_id]['prev'] = self.currently_playing
-        self._videos[video_id]['next'] = next_video
-        self.currently_playing = video_id
-
-    def get_next_song(self):
-        if self.currently_playing is None:
-            self.currently_playing = self.first
-            return self.first
-        next_video = self._videos[self.currently_playing]['next']
-
-        if next_video is None:
-            return None
-
-        self.currently_playing = next_video
-        return self.currently_playing
-
-    def get_prev_song(self):
-        if self.currently_playing is None:
-            return None
-        self.currently_playing = self._videos[self.currently_playing]['prev']
-        return self.currently_playing
+            raise PlayListError('Video is already in playlist.')
+        if after_id not in self._videos:
+            raise PlayListError('Cannot insert video: %s not in playlist.' % after_id)
+        left_video = self[after_id]
+        right_video_id = left_video['next']
+        self[right_video_id]['prev'] = video_id
+        left_video['next'] = video_id
+        self[video_id]['next'] = right_video_id
+        self[video_id]['prev'] = after_id
