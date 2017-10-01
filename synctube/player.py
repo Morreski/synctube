@@ -14,7 +14,7 @@ class Player:
         self._id = id_
         self._event_stream = list()
         self.playlist = Playlist()
-        self.position_in_playlist = -1
+        self.position_in_playlist = None
         self._subscriptions = list()
 
     async def add_event(self, event):
