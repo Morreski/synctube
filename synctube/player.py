@@ -10,16 +10,22 @@ class PlaylistError(Exception):
 
 class Player:
 
-    def __init__(self, id_):
+    def __init__(self, id_, max_event_stream_size=100):
         self._id = id_
-        self._event_stream = asyncio.queues.Queue()
-        self._playlist = Playlist()
+        self._event_stream = list()
+        self.playlist = Playlist()
+        self.position_in_playlist = -1
+        self._subscriptions = list()
 
     async def add_event(self, event):
-        await self._event_stream.put(event)
+        self._event_stream.append(event)
+        for subscription in self._subscriptions:
+            await subscription.put(event)
 
-    async def poll_event(self):
-        return await self._event_stream.get()
+    def subscribe(self):
+        subscription = asyncio.queues.Queue()
+        self._subscriptions.append(subscription)
+        return subscription
 
 
 class Playlist:

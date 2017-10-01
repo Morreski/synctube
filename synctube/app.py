@@ -29,12 +29,12 @@ parser.add_argument('--debug',
 
 def make_app(debug=True):
     routes = [
-        #(r'^/player/(?P<player_id>[a-zA-Z0-9]*)$', views.PlayerPage),
+        (r'^/player/(?P<player_id>[a-zA-Z0-9]*)$', views.PlayerView),
         (r'^/player/(?P<player_id>[a-zA-Z0-9]*)/subscribe$', AsyncioSSEHandler, {'datasource': PlayerEventStream}),
 
         #(r'^/player/(?P<player_id>[a-zA-Z0-9]*)/playlist/add/(?P<video_id>.*)$', handlers.AddVideoToPlaylist),
 
-        (r'^/controller/(?P<player_id>[a-zA-Z0-9]*)$', views.ControllerPage),
+        (r'^/controller/(?P<player_id>[a-zA-Z0-9]*)$', views.ControllerView),
 
         #(r'/home$', views.HomePage),
         #(r'^/$', tornado.web.RedirectHandler, {'url': '/home'}),

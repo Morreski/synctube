@@ -3,6 +3,16 @@ import asyncio
 from tornado.web import RequestHandler
 
 
+class SSEError(Exception):
+
+    def __init__(self, code, reason):
+        self.reason = reason
+        self.code = code
+
+    def __str__(self):
+        return '<%d>: %s' % (self.code, self.reason)
+
+
 class DataSource:
 
     def __init__(self, max_iterations=1, forever=False, **kwargs):
@@ -51,7 +61,11 @@ class AsyncioSSEHandler(RequestHandler):
 
     async def get(self, **kwargs):
         datasource = self.datasource(forever=True, **kwargs)
-        await datasource.before()
+        try:
+            await datasource.before()
+        except SSEError as e:
+            self.send_error(e.code, reason=e.reason)
+            return
         async for data in datasource:
             await self.publish(*data)
             if self.freq > 0:

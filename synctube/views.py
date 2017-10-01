@@ -3,7 +3,7 @@ import json
 from tornado.web import RequestHandler
 
 from synctube import shared
-from synctube.player import PlayerEvent
+from synctube.player import PlayerEvent, Player
 
 
 class HomePage(RequestHandler):
@@ -12,7 +12,7 @@ class HomePage(RequestHandler):
         self.render('index.html')
 
 
-class PlayerPage(RequestHandler):
+class PlayerView(RequestHandler):
 
     async def get(self, player_id):
         self.render(
@@ -20,24 +20,38 @@ class PlayerPage(RequestHandler):
             player_id=player_id
         )
 
+    async def post(self, player_id):
+        if player_id in shared.PLAYERS:
+            self.send_error(400, reason='Player already exists.')
+            return
+        player = Player(player_id)
+        shared.PLAYERS[player_id] = player
 
-class ControllerPage(RequestHandler):
+    async def delete(self, player_id):
+        if player_id not in shared.PLAYERS:
+            self.send_error(404, reason='Player not found.')
+            return
+        player = Player(player_id)
+        shared.PLAYERS[player_id] = player
+
+
+class ControllerView(RequestHandler):
 
     async def post(self, player_id):
         if player_id not in shared.PLAYERS:
-            self.send_error(404)
+            self.send_error(404, 'Player not found.')
             return
         try:
             event_dict = json.loads(self.request.body.decode())
             event = PlayerEvent(**event_dict)
         except json.JSONDecodeError as e:
-            self.send_error(400, reason='Bad JSON: %s' % e)
+            self.send_error(400, reason='Invalid JSON: %s.' % e)
 
         await shared.PLAYERS[player_id].add_event(event)
 
     async def get(self, player_id):
         if player_id not in shared.PLAYERS:
-            self.send_error(404)
+            self.send_error(404, reason='Player not found.')
             return
         self.render(
             'controller.html',
