@@ -12,13 +12,12 @@ class Player:
 
     def __init__(self, id_, max_event_stream_size=100):
         self._id = id_
-        self._event_stream = list()
         self.playlist = Playlist()
         self.position_in_playlist = None
         self._subscriptions = list()
 
     async def add_event(self, event):
-        self._event_stream.append(event)
+        self.run_hook(event)
         for subscription in self._subscriptions:
             await subscription.put(event)
 
@@ -26,6 +25,33 @@ class Player:
         subscription = asyncio.queues.Queue()
         self._subscriptions.append(subscription)
         return subscription
+
+    def get_navigation(self):
+        if self.position_in_playlist is None:
+            return {'prev': None, 'next': self.playlist.first}
+        return self.playlist[self.position_in_playlist]
+
+    def run_hook(self, event):
+        event_type = event.type
+        hook = getattr(self, 'hook_' + event_type, None)
+        if hook is not None:
+            hook(event)
+
+    def hook_play_next(self, event):
+        pos = self.position_in_playlist
+        if pos is None:
+            next_song = self.playlist.first
+        else:
+            next_song = self.playlist[pos]['next']
+        self.position_in_playlist = next_song
+
+    def hook_play_prev(self, event):
+        pos = self.position_in_playlist
+        if pos is None:
+            prev_song = None
+        else:
+            prev_song = self.playlist[pos]['prev']
+        self.position_in_playlist = prev_song
 
 
 class Playlist:

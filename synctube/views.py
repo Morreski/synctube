@@ -3,7 +3,7 @@ import json
 from tornado.web import RequestHandler
 
 from synctube import shared
-from synctube.player import PlayerEvent, Player
+from synctube.player import PlayerEvent, Player, PlaylistError
 
 
 class HomePage(RequestHandler):
@@ -18,7 +18,12 @@ class PlaylistView(RequestHandler):
         if player_id not in shared.PLAYERS:
             self.send_error(404, reason='Player not found.')
             return
-        self.write({'videos': list(shared.PLAYERS[player_id].playlist)})
+        player = shared.PLAYERS[player_id]
+        self.write({
+            'videos': list(player.playlist),
+            'navigation': player.get_navigation(),
+            'currently_playing': player.position_in_playlist,
+        })
 
     async def post(self, player_id):
         if player_id not in shared.PLAYERS:
@@ -27,13 +32,21 @@ class PlaylistView(RequestHandler):
         try:
             data = json.loads(self.request.body.decode())
             video_id = data['video_id']
+            after_id = data.get('insert_after')
         except json.JSONDecodeError as e:
             self.send_error(400, reason='Invalid JSON: %s.' % e)
             return
-        except KeyError:
-            self.send_error(400, reason='Missing "video_id" field in request.')
+        except KeyError as e:
+            self.send_error(400, reason='Field is required: %s.' % e)
             return
-        shared.PLAYERS[player_id].playlist.append(video_id)
+        try:
+            if after_id is None:
+                shared.PLAYERS[player_id].playlist.append(video_id)
+            else:
+                shared.PLAYERS[player_id].playlist.insert_after(after_id, video_id)
+        except PlaylistError as e:
+            self.send_error(400, reason=str(e))
+
         event = PlayerEvent(data={}, type='playlistUpdated')
         await shared.PLAYERS[player_id].add_event(event)
 

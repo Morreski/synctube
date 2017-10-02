@@ -3,7 +3,7 @@ let es = new EventSource(eventSourceURL);
 let player;
 
 
-es.addEventListener('playNow', function(evt){
+es.addEventListener('play_now', function(evt){
     data = JSON.parse(evt.data);
     playVideo(data.video_id);
 });
@@ -17,16 +17,16 @@ es.addEventListener('pause', function(evt){
     player.pauseVideo();
 });
 
-es.addEventListener('playlistUpdated', function(evt){
+es.addEventListener('playlist_updated', function(evt){
     refreshPlaylist();
 });
 
-es.addEventListener('playNext', function(evt){
+es.addEventListener('play_next', function(evt){
     playNextVideo();
 });
 
 
-es.addEventListener('playPrev', function(evt){
+es.addEventListener('play_prev', function(evt){
     playNextVideo(true);
 });
 
