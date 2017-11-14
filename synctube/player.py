@@ -1,6 +1,8 @@
 from collections import namedtuple, defaultdict
 import asyncio
 
+from synctube.hooks import hook_play_next, hook_play_prev
+
 PlayerEvent = namedtuple('PlayerEvent', ['type', 'data'])
 
 
@@ -10,16 +12,37 @@ class PlaylistError(Exception):
 
 class Player:
 
-    def __init__(self, id_, max_event_stream_size=100):
+    DEFAULT_HOOKS = {
+        'play_next': [hook_play_next],
+        'play_prev': [hook_play_prev]
+    }
+
+    def __init__(self, id_, max_event_stream_size=100, hooks={}):
         self._id = id_
         self.playlist = Playlist()
         self.position_in_playlist = None
         self._subscriptions = list()
+        self._hooks = hooks or self._init_hooks()
 
     async def add_event(self, event):
         self.run_hook(event)
         for subscription in self._subscriptions:
             await subscription.put(event)
+
+    def _init_hooks(self):
+        return self.DEFAULT_HOOKS.copy()
+
+    def add_hook(self, event_type, hook_func):
+        if not callable(hook_func):
+            raise TypeError('hook_func must be callable.')
+        self._hooks[event_type] = hook_func
+
+    def remove_hook(self, event_type):
+        del self._hooks[event_type]
+
+    @property
+    def hook(self):
+        return self._hooks
 
     def subscribe(self):
         subscription = asyncio.queues.Queue()
@@ -32,26 +55,8 @@ class Player:
         return self.playlist[self.position_in_playlist]
 
     def run_hook(self, event):
-        event_type = event.type
-        hook = getattr(self, 'hook_' + event_type, None)
-        if hook is not None:
-            hook(event)
-
-    def hook_play_next(self, event):
-        pos = self.position_in_playlist
-        if pos is None:
-            next_song = self.playlist.first
-        else:
-            next_song = self.playlist[pos]['next']
-        self.position_in_playlist = next_song
-
-    def hook_play_prev(self, event):
-        pos = self.position_in_playlist
-        if pos is None:
-            prev_song = None
-        else:
-            prev_song = self.playlist[pos]['prev']
-        self.position_in_playlist = prev_song
+        for hook in self._hooks.get(event.type, []):
+            hook(self, event)
 
 
 class Playlist:
