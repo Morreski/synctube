@@ -85,9 +85,13 @@ class ControllerView(RequestHandler):
             return
         try:
             event_dict = json.loads(self.request.body.decode())
+            event_dict.setdefault('data', {})
             event = PlayerEvent(**event_dict)
         except json.JSONDecodeError as e:
             self.send_error(400, reason='Invalid JSON: %s.' % e)
+        except TypeError:
+            self.send_error(400, reason='Invalid request.')
+            return
 
         await shared.PLAYERS[player_id].add_event(event)
 
