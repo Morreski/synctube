@@ -1,6 +1,7 @@
 import asyncio
 
 from tornado.web import RequestHandler
+from tornado.iostream import StreamClosedError
 
 
 class SSEError(Exception):
@@ -66,8 +67,12 @@ class AsyncioSSEHandler(RequestHandler):
         except SSEError as e:
             self.send_error(e.code, reason=e.reason)
             return
-        async for data in datasource:
-            await self.publish(*data)
-            if self.freq > 0:
-                await asyncio.sleep(1 / self.freq)
-        await datasource.after()
+        try:
+            async for data in datasource:
+                await self.publish(*data)
+                if self.freq > 0:
+                    await asyncio.sleep(1 / self.freq)
+        except StreamClosedError:
+            pass
+        finally:
+            await datasource.after()
